@@ -7,7 +7,7 @@ getTicker = input("Please enter a valid ticker: ")
 ticker = str(getTicker).upper()
 
 url = f'https://yfapi.net/v7/finance/options/{ticker}'
-personal_api_key = {'x-api-key':'8MM0rOwJ2T841kw8xbn1m7rYBRIy7aH11SN2gX6G'}
+personal_api_key = 
 
 response = rq.request("GET", url, headers=personal_api_key)
 responseJSON = json.loads(response.text)
