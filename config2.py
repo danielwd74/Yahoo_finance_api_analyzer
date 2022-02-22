@@ -23,6 +23,10 @@ for ticker in tickers:
     callOptions = responseJSON['optionChain']['result'][0]['options'][0]['calls']
     df = pd.DataFrame(data=callOptions)
 
+    #convert unix date to excel date
+    df['expiration'] = df['expiration'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+    df['lastTradeDate'] = df['lastTradeDate'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+
     dt = str(datetime.datetime.now())
     dt = dt[:dt.find(' ')]
     #ts = datetime.timestamp(dt)
