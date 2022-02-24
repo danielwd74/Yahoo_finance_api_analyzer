@@ -10,33 +10,41 @@ tickers = ticker.split(", ")
 f = open('apikey.txt', 'r')
 api_key = (f.read()).strip()
 
-f_usage_count = open('usage.txt', 'r')
+with open('usage.txt', 'r') as f3:
+    usage = f3.read()
+    usage_count = len(usage.split("\n"))
+    print(f"The number of ticker calls used is {usage_count}/100")
 
-for ticker in tickers:
-    url = f'https://yfapi.net/v7/finance/options/{ticker}'
-    personal_api_key = {'x-api-key': str(api_key)}
+dt = str(datetime.datetime.now())
+dt = dt[:dt.find(' ')]
 
-    response = rq.request("GET", url, headers=personal_api_key)
-    responseJSON = json.loads(response.text)
+if usage_count < 100:
+    for ticker in tickers:
+        url = f'https://yfapi.net/v7/finance/options/{ticker}'
+        personal_api_key = {'x-api-key': str(api_key)}
 
-    #make call options CSV
-    callOptions = responseJSON['optionChain']['result'][0]['options'][0]['calls']
-    df = pd.DataFrame(data=callOptions)
+        response = rq.request("GET", url, headers=personal_api_key)
+        responseJSON = json.loads(response.text)
 
-    #convert unix date to excel date
-    df['expiration'] = df['expiration'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
-    df['lastTradeDate'] = df['lastTradeDate'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+        #make call options CSV
+        callOptions = responseJSON['optionChain']['result'][0]['options'][0]['calls']
+        df = pd.DataFrame(data=callOptions)
 
-    dt = str(datetime.datetime.now())
-    dt = dt[:dt.find(' ')]
-    #ts = datetime.timestamp(dt)
-    df.to_csv(f'call_options/{dt}_{ticker}_C.csv', sep=",")
+        #convert unix date to excel date
+        df['expiration'] = df['expiration'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+        df['lastTradeDate'] = df['lastTradeDate'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
 
-    #make put options CSV
-    putOptions = responseJSON['optionChain']['result'][0]['options'][0]['puts']
-    df2 = pd.DataFrame(data=putOptions)
-    
-    df2.to_csv(f'put_options/{dt}_{ticker}_P.csv', sep=",")
+        #ts = datetime.timestamp(dt)
+        df.to_csv(f'call_options/{dt}_{ticker}_C.csv', sep=",")
+
+        #make put options CSV
+        putOptions = responseJSON['optionChain']['result'][0]['options'][0]['puts']
+        df2 = pd.DataFrame(data=putOptions)
+        
+        df2.to_csv(f'put_options/{dt}_{ticker}_P.csv', sep=",")
+else:
+    print("Usage count maximum, used 100/100 calls to api")
+
 f.close()
 
 with open('date.txt', "r+") as f2:
@@ -47,10 +55,14 @@ with open('date.txt', "r+") as f2:
             f3.truncate(0)
             f2.truncate(0)
             f2.write(dt)
+            print("DATE DIFF DETECTED: Allowed maximum 100 reset")
             f3.close()
     else:
         f2.write(dt)
     
-with open('usage.txt', "w") as f3:
+with open('usage.txt', "a") as f3:
     for ticker in tickers:
         f3.write(ticker + "\n")
+
+
+    
