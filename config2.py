@@ -18,6 +18,15 @@ with open('usage.txt', 'r') as f3:
 dt = str(datetime.datetime.now())
 dt = dt[:dt.find(' ')]
 
+#takes pandas series, returns new updated pandas series of string dates from unix
+#PLEASE NOTE: All time conversions are done in EST
+def convert_date(pandas_series, series_name):
+    new_str_date = []
+    for day in pandas_series:
+        new_str_date.append(datetime.datetime.fromtimestamp(day).strftime('%m/%d/%Y'))
+    return pd.Series(new_str_date, name=series_name)
+
+
 if usage_count < 100:
     for ticker in tickers:
         url = f'https://yfapi.net/v7/finance/options/{ticker}'
@@ -31,15 +40,25 @@ if usage_count < 100:
         df = pd.DataFrame(data=callOptions)
 
         #convert unix date to excel date
-        df['expiration'] = df['expiration'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
-        df['lastTradeDate'] = df['lastTradeDate'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+        #old method
+        #df['expiration'] = df['expiration'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+        #new method
+        df['expiration'].update(convert_date(df['expiration'], 'expiration'))
 
-        #ts = datetime.timestamp(dt)
+        #old method
+        #df['lastTradeDate'] = df['lastTradeDate'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
+        #new method
+        df['lastTradeDate'].update(convert_date(df['lastTradeDate'], 'lastTradeDate'))
+            
         df.to_csv(f'call_options/{dt}_{ticker}_C.csv', sep=",")
 
         #make put options CSV
         putOptions = responseJSON['optionChain']['result'][0]['options'][0]['puts']
         df2 = pd.DataFrame(data=putOptions)
+
+        #convert unix date to excel date
+        df2['expiration'].update(convert_date(df2['expiration'], 'expiration'))
+        df2['lastTradeDate'].update(convert_date(df2['lastTradeDate'], 'lastTradeDate'))
         
         df2.to_csv(f'put_options/{dt}_{ticker}_P.csv', sep=",")
 else:
