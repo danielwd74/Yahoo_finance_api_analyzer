@@ -47,18 +47,21 @@ else:
 
 f.close()
 
-with open('date.txt', "r+") as f2:
+with open('date.txt', "r") as f2:
     data_in = (f2.read()).strip()
-    if data_in:
-        if data_in != dt:
-            f3 = open('usage.txt', 'r+')
-            f3.truncate(0)
-            f2.truncate(0)
-            f2.write(dt)
-            print("DATE DIFF DETECTED: Allowed maximum 100 reset")
-            f3.close()
-    else:
+    print(f"Date read from file: {data_in}")
+    if data_in != dt:
+        f2.close()
+        f2 = open('date.txt', 'w')
+        f3 = open('usage.txt', 'r+')
+        f3.truncate(0)
+        f2.truncate(0)
+        print(f"Current date time value: {dt}")
         f2.write(dt)
+        f2.close()
+        print("DATE DIFF DETECTED: Allowed maximum 100 reset")
+        f3.close()
+f2.close()
     
 with open('usage.txt', "a") as f3:
     for ticker in tickers:
