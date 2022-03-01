@@ -38,40 +38,60 @@ while True:
                 try:
                     file_name = "call_options/" + file_name + "_C.csv"
                     calls_dataframe = pd.read_csv(file_name, sep=',')
-                    print("///////////////////////////////////////////////////")
-                    print("Total volume: " + str(calls_dataframe['volume'].sum()))
-                    total_calls = calls_dataframe['contractSymbol'].count()
-                    print("Total options: " + str(total_calls))
-                    #Bought at or below bid
-                    atOrBelowBid = ((calls_dataframe['lastPrice'] <= calls_dataframe['bid']).value_counts())
-                    #Count of true values
-                    print("Bought at or below bid: " + str((atOrBelowBid.get(key=True))))
-                    print("Percentage of total: " + str(round((atOrBelowBid.get(key=True)) / total_calls * 100, 2)) + "%")
-                    #Bought at ask or above
-                    atOrAboveAsk = ((calls_dataframe['lastPrice'] >= calls_dataframe['ask']).value_counts())
-                    #Count of True values
-                    print("Bought at or above ask: " + str(atOrAboveAsk.get(key=True)))
-                    print("Percentage of total: " + str(round((atOrAboveAsk.get(key=True)) / total_calls * 100, 2)) + "%")
-                    #Between the market
-                    betweenTheMarket = ((calls_dataframe['lastPrice'] > calls_dataframe['bid']) & (calls_dataframe['lastPrice'] < calls_dataframe['ask'])).value_counts()
-                    print("Bought between market (at price between bid and ask): " + str(betweenTheMarket.get(key=True)))
-                    print("Percentage of total: " + str(round((betweenTheMarket.get(key=True)) / total_calls * 100, 2)) + "%")
-                    print("///////////////////////////////////////////////////")
-
-
                 except:
                     print(f'-----------------------\nERROR: Ticker {ticker_input} does not exist, cannot open file\n-----------------------')
+                else:
+                    with open('generated_reports/' + file_name[:-4] + '_REPORT.txt', 'w') as new_f:
+                        new_f.write("///////////////////////////////////////////////////\n")
+                        new_f.write(f"REPORT FOR TICKER {ticker_input} ON DATE {date_input}\n\n")
+                        new_f.write("Total volume: " + str(calls_dataframe['volume'].sum()) + "\n")
+                        total_calls = calls_dataframe['contractSymbol'].count()
+                        new_f.write("Total options: " + str(total_calls) + "\n")
+                        #Bought at or below bid
+                        atOrBelowBid = ((calls_dataframe['lastPrice'] <= calls_dataframe['bid']).value_counts())
+                        #Count of true values
+                        new_f.write("Bought at or below bid: " + str((atOrBelowBid.get(key=True))) + "\n")
+                        new_f.write("Percentage of total: " + str(round((atOrBelowBid.get(key=True)) / total_calls * 100, 2)) + "%\n")
+                        #Bought at ask or above
+                        atOrAboveAsk = ((calls_dataframe['lastPrice'] >= calls_dataframe['ask']).value_counts())
+                        #Count of True values
+                        new_f.write("Bought at or above ask: " + str(atOrAboveAsk.get(key=True)) + "\n")
+                        new_f.write("Percentage of total: " + str(round((atOrAboveAsk.get(key=True)) / total_calls * 100, 2)) + "%\n" )
+                        #Between the market
+                        betweenTheMarket = ((calls_dataframe['lastPrice'] > calls_dataframe['bid']) & (calls_dataframe['lastPrice'] < calls_dataframe['ask'])).value_counts()
+                        new_f.write("Bought between market (at price between bid and ask): " + str(betweenTheMarket.get(key=True)) + "\n")
+                        new_f.write("Percentage of total: " + str(round((betweenTheMarket.get(key=True)) / total_calls * 100, 2)) + "%\n")
+                        new_f.write("///////////////////////////////////////////////////\n")
+                    new_f.close()
             else:
                 try:
                     file_name = "put_options/" + file_name + "_P.csv"
                     puts_dataframe = pd.read_csv(file_name, sep=',')
-                    print("Total volume: " + str(puts_dataframe['volume'].sum()))
-                    #Bought at or below bid
-                    print()
-
                 except:
                     print(f'ERROR: Ticker {ticker_input} does not exist, cannot open file') 
-
+                else:
+                    with open('generated_reports/' + file_name[:-4] + '_REPORT.txt', 'w') as new_f:
+                        new_f.write("///////////////////////////////////////////////////\n")
+                        new_f.write(f"REPORT FOR TICKER {ticker_input} ON DATE {date_input}\n\n")
+                        new_f.write("Total volume: " + str(puts_dataframe['volume'].sum()) + "\n")
+                        total_calls = puts_dataframe['contractSymbol'].count()
+                        new_f.write("Total options: " + str(total_calls) + "\n")
+                        #Bought at or below bid
+                        atOrBelowBid = ((puts_dataframe['lastPrice'] <= puts_dataframe['bid']).value_counts())
+                        #Count of true values
+                        new_f.write("Bought at or below bid: " + str((atOrBelowBid.get(key=True))) + "\n")
+                        new_f.write("Percentage of total: " + str(round((atOrBelowBid.get(key=True)) / total_calls * 100, 2)) + "%\n")
+                        #Bought at ask or above
+                        atOrAboveAsk = ((puts_dataframe['lastPrice'] >= puts_dataframe['ask']).value_counts())
+                        #Count of True values
+                        new_f.write("Bought at or above ask: " + str(atOrAboveAsk.get(key=True)) + "\n")
+                        new_f.write("Percentage of total: " + str(round((atOrAboveAsk.get(key=True)) / total_calls * 100, 2)) + "%\n" )
+                        #Between the market
+                        betweenTheMarket = ((puts_dataframe['lastPrice'] > puts_dataframe['bid']) & (puts_dataframe['lastPrice'] < puts_dataframe['ask'])).value_counts()
+                        new_f.write("Bought between market (at price between bid and ask): " + str(betweenTheMarket.get(key=True)) + "\n")
+                        new_f.write("Percentage of total: " + str(round((betweenTheMarket.get(key=True)) / total_calls * 100, 2)) + "%\n")
+                        new_f.write("///////////////////////////////////////////////////\n")
+                    new_f.close()
 #for f in os.listdir(calls):
 #    file = 'call_options/' + f
 #    if os.path.isfile(file):

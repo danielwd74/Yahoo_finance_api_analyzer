@@ -1,0 +1,12 @@
+///////////////////////////////////////////////////
+REPORT FOR TICKER T ON DATE 3/1/2022
+
+Total volume: 5810.0
+Total options: 31
+Bought at or below bid: 14
+Percentage of total: 45.16%
+Bought at or above ask: 14
+Percentage of total: 45.16%
+Bought between market (at price between bid and ask): 3
+Percentage of total: 9.68%
+///////////////////////////////////////////////////
