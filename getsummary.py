@@ -1,8 +1,31 @@
 import os
 import pandas as pd
 
-calls = 'call_options'
-puts = 'put_options'
+def getReport(file, dataframe, ticker_input, date_input):
+    file.write("///////////////////////////////////////////////////\n")
+    file.write(f"REPORT FOR TICKER {ticker_input} ON DATE {date_input}\n\n")
+    total_volume = dataframe['volume'].sum()
+    file.write("Total volume: " + str(total_volume) + "\n")
+    total_calls = dataframe['contractSymbol'].count()
+    file.write("Total options: " + str(total_calls) + "\n")
+    #Bought at or below bid dataframe slice
+    atOrBelowBid = dataframe.loc[(dataframe['lastPrice'] <= dataframe['bid'])]
+    atOrBelowBid_totalVolume = atOrBelowBid['volume'].sum()
+    file.write("Bought at or below bid volume sum: " + str(atOrBelowBid_totalVolume) + '\n')
+    file.write("Percentage of total: " + str(round(atOrBelowBid_totalVolume / total_volume * 100, 2)) + "%\n")
+
+    #Bought at or above ask dataframe slice
+    atOrAboveAsk = dataframe.loc[(dataframe['lastPrice'] >= dataframe['ask'])]
+    atOrAboveAsk_totalVolume = atOrAboveAsk['volume'].sum()
+    file.write("Bought at or above ask volume sum: " + str(atOrAboveAsk_totalVolume)+ '\n')
+    file.write("Percentage of total: " + str(round(atOrAboveAsk_totalVolume / total_volume * 100, 2)) + "%\n")
+    
+    #Bought between market (at price between bid and ask)
+    betweenTheMarket = dataframe.loc[(dataframe['lastPrice'] > dataframe['bid']) & (dataframe['lastPrice'] < dataframe['ask'])]
+    betweenTheMarket_totalVolume = betweenTheMarket['volume'].sum()
+    file.write("Bought between market (at price between bid and ask) volume sum: " + str(betweenTheMarket_totalVolume)+ '\n')
+    file.write("Percentage of total: " + str(round(betweenTheMarket_totalVolume / total_volume * 100, 2)) + "%\n")            
+    file.write("///////////////////////////////////////////////////\n")
 
 while True:
     date_input = str(input("Please enter a date in format mm/dd/yyyy or Q to quit: "))
@@ -16,11 +39,11 @@ while True:
     file_date = date_input_array[2] + "-" + date_input_array[0] + "-" + date_input_array[1]
     dateExists = False
     try:
-        for file_name in os.listdir(calls):
+        for file_name in os.listdir('call_options/'):
             if file_date in file_name:
                 dateExists = True
                 break
-        for file_name in os.listdir(puts):
+        for file_name in os.listdir('put_options/'):
             if file_date in file_name:
                 dateExists = True
                 break
@@ -42,26 +65,7 @@ while True:
                     print(f'-----------------------\nERROR: Ticker {ticker_input} does not exist, cannot open file\n-----------------------')
                 else:
                     with open('generated_reports/' + file_name[:-4] + '_REPORT.txt', 'w') as new_f:
-                        new_f.write("///////////////////////////////////////////////////\n")
-                        new_f.write(f"REPORT FOR TICKER {ticker_input} ON DATE {date_input}\n\n")
-                        new_f.write("Total volume: " + str(calls_dataframe['volume'].sum()) + "\n")
-                        total_calls = calls_dataframe['contractSymbol'].count()
-                        new_f.write("Total options: " + str(total_calls) + "\n")
-                        #Bought at or below bid
-                        atOrBelowBid = ((calls_dataframe['lastPrice'] <= calls_dataframe['bid']).value_counts())
-                        #Count of true values
-                        new_f.write("Bought at or below bid: " + str((atOrBelowBid.get(key=True))) + "\n")
-                        new_f.write("Percentage of total: " + str(round((atOrBelowBid.get(key=True)) / total_calls * 100, 2)) + "%\n")
-                        #Bought at ask or above
-                        atOrAboveAsk = ((calls_dataframe['lastPrice'] >= calls_dataframe['ask']).value_counts())
-                        #Count of True values
-                        new_f.write("Bought at or above ask: " + str(atOrAboveAsk.get(key=True)) + "\n")
-                        new_f.write("Percentage of total: " + str(round((atOrAboveAsk.get(key=True)) / total_calls * 100, 2)) + "%\n" )
-                        #Between the market
-                        betweenTheMarket = ((calls_dataframe['lastPrice'] > calls_dataframe['bid']) & (calls_dataframe['lastPrice'] < calls_dataframe['ask'])).value_counts()
-                        new_f.write("Bought between market (at price between bid and ask): " + str(betweenTheMarket.get(key=True)) + "\n")
-                        new_f.write("Percentage of total: " + str(round((betweenTheMarket.get(key=True)) / total_calls * 100, 2)) + "%\n")
-                        new_f.write("///////////////////////////////////////////////////\n")
+                        getReport(new_f, calls_dataframe, ticker_input, date_input)
                     new_f.close()
             else:
                 try:
@@ -71,26 +75,7 @@ while True:
                     print(f'ERROR: Ticker {ticker_input} does not exist, cannot open file') 
                 else:
                     with open('generated_reports/' + file_name[:-4] + '_REPORT.txt', 'w') as new_f:
-                        new_f.write("///////////////////////////////////////////////////\n")
-                        new_f.write(f"REPORT FOR TICKER {ticker_input} ON DATE {date_input}\n\n")
-                        new_f.write("Total volume: " + str(puts_dataframe['volume'].sum()) + "\n")
-                        total_calls = puts_dataframe['contractSymbol'].count()
-                        new_f.write("Total options: " + str(total_calls) + "\n")
-                        #Bought at or below bid
-                        atOrBelowBid = ((puts_dataframe['lastPrice'] <= puts_dataframe['bid']).value_counts())
-                        #Count of true values
-                        new_f.write("Bought at or below bid: " + str((atOrBelowBid.get(key=True))) + "\n")
-                        new_f.write("Percentage of total: " + str(round((atOrBelowBid.get(key=True)) / total_calls * 100, 2)) + "%\n")
-                        #Bought at ask or above
-                        atOrAboveAsk = ((puts_dataframe['lastPrice'] >= puts_dataframe['ask']).value_counts())
-                        #Count of True values
-                        new_f.write("Bought at or above ask: " + str(atOrAboveAsk.get(key=True)) + "\n")
-                        new_f.write("Percentage of total: " + str(round((atOrAboveAsk.get(key=True)) / total_calls * 100, 2)) + "%\n" )
-                        #Between the market
-                        betweenTheMarket = ((puts_dataframe['lastPrice'] > puts_dataframe['bid']) & (puts_dataframe['lastPrice'] < puts_dataframe['ask'])).value_counts()
-                        new_f.write("Bought between market (at price between bid and ask): " + str(betweenTheMarket.get(key=True)) + "\n")
-                        new_f.write("Percentage of total: " + str(round((betweenTheMarket.get(key=True)) / total_calls * 100, 2)) + "%\n")
-                        new_f.write("///////////////////////////////////////////////////\n")
+                        getReport(new_f, puts_dataframe, ticker_input, date_input)
                     new_f.close()
 #for f in os.listdir(calls):
 #    file = 'call_options/' + f
