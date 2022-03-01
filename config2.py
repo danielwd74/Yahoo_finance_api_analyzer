@@ -26,6 +26,11 @@ def convert_date(pandas_series, series_name):
         new_str_date.append(datetime.datetime.fromtimestamp(day).strftime('%m/%d/%Y'))
     return pd.Series(new_str_date, name=series_name)
 
+def convert_date_hours_minuites(pandas_series, series_name):
+    new_str_date = []
+    for day in pandas_series:
+        new_str_date.append(datetime.datetime.fromtimestamp(day).strftime('%m/%d/%Y, %H:%M'))
+    return pd.Series(new_str_date, name=series_name)
 
 if usage_count < 100:
     for ticker in tickers:
@@ -48,7 +53,7 @@ if usage_count < 100:
         #old method
         #df['lastTradeDate'] = df['lastTradeDate'].apply(lambda x: f'=TEXT((({x} / 86400) + DATE(1970, 1, 1)), "mm/dd/yyyy")')
         #new method
-        df['lastTradeDate'].update(convert_date(df['lastTradeDate'], 'lastTradeDate'))
+        df['lastTradeDate'].update(convert_date_hours_minuites(df['lastTradeDate'], 'lastTradeDate'))
             
         df.to_csv(f'call_options/{dt}_{ticker}_C.csv', sep=",")
 
@@ -58,7 +63,7 @@ if usage_count < 100:
 
         #convert unix date to excel date
         df2['expiration'].update(convert_date(df2['expiration'], 'expiration'))
-        df2['lastTradeDate'].update(convert_date(df2['lastTradeDate'], 'lastTradeDate'))
+        df2['lastTradeDate'].update(convert_date_hours_minuites(df2['lastTradeDate'], 'lastTradeDate'))
         
         df2.to_csv(f'put_options/{dt}_{ticker}_P.csv', sep=",")
 else:
