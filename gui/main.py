@@ -1,6 +1,7 @@
 import constant
 from tkinter import *
 import sys
+from getData import *
 
 class MainWindow:
     def __init__(self, master):
@@ -35,8 +36,37 @@ class MainWindow:
 class WindowGetOptionData:
     def __init__(self, master):
         self.master = master
-        self.label = Label(self.master, text="Hello there 1")
+        self.label = Label(self.master, text="Please enter tickers and press enter")
+        self.entry = Entry(self.master)
+        self.entries = []
+        self.master.bind('<Return>', self.add_entry)
+        self.text = StringVar()
+        self.label2 = Label(self.master, textvariable=self.text, wraplength=(constant.WINDOW_WIDTH - 10))
+        self.enterB = Button(self.master, text="Get data", bg='lightblue', command=self.get_data)
+        self.text2 = StringVar()
+        self.label3 = Label(self.master, textvariable=self.text2, wraplength=(constant.WINDOW_WIDTH - 10))
+
         self.label.pack()
+        self.entry.pack()
+        self.label2.pack()
+        self.enterB.pack()
+        self.label3.pack()
+
+    def add_entry(self, event):
+        self.entries.append(self.entry.get()) 
+        val = ''
+        for text in self.entries:
+            val += (text + ", ")
+        self.text.set(val)
+        self.entry.delete(0, 'end')
+    
+    def get_data(self):
+        self.text.set("")
+        usage = get_usage()
+        self.text2.set('\n' + get_date_diff(self.entries) + "\n" + f"The number of requests used: {usage}/100")
+        request_tickers(self.entries, usage)
+        self.entries = []
+        #routine to show usage
 
 class WindowGenerateOptionReport:
     def __init__(self, master):
