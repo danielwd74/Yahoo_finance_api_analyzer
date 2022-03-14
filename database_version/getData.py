@@ -1,18 +1,30 @@
+from yahoo_fin import options
 import requests as rq
 import pandas as pd
 import json
 import datetime
 import pgdata
+import calendar
+
+def get_unix_times(ticker: str):
+    spy_dates = options.get_expiration_dates(ticker)
+    new = [datetime.datetime.strptime(date, "%B %d, %Y") for date in spy_dates]
+    print(new)
+    unix_time = [str(int(calendar.timegm(newTime.timetuple()))) for newTime in new]
+    print(unix_time)
+    return unix_time
+
 
 def get_usage():
-    with open('metadata/usage.txt', 'r') as f3:
-        usage = f3.read()
-        usage_count = len(usage.split("\n"))
-        #print(f"The number of ticker calls used is {usage_count}/100")
-    return usage_count
+    file = open('metadata/usage.txt', 'r')
+    lines = file.read()
+    lines = lines.split("\n")
+    total = sum([int(number) for number in lines])
+    file.close()
+    return total
 
 
-def request_tickers(ticker: str, usage_count: int):
+def request_tickers(ticker: str, usage_count: int, unix_time: str):
     #takes pandas series, returns new updated pandas series of string dates from unix
     #PLEASE NOTE: All time conversions are done in EST
     api_key = pgdata.API_KEY
@@ -36,7 +48,7 @@ def request_tickers(ticker: str, usage_count: int):
         options = {}
         calls = []
         puts = []
-        url = f'https://yfapi.net/v7/finance/options/{ticker}'
+        url = f'https://yfapi.net/v7/finance/options/{ticker}?date={unix_time}'
         personal_api_key = {'x-api-key': str(api_key)}
 
         response = rq.request("GET", url, headers=personal_api_key)
@@ -45,7 +57,7 @@ def request_tickers(ticker: str, usage_count: int):
         #make call options CSV
         callOptions = responseJSON['optionChain']['result'][0]['options'][0]['calls']
         df = pd.DataFrame(data=callOptions)
-
+        
         #convert unix date to excel date
         df['expiration'].update(convert_date(df['expiration'], 'expiration'))
         df['lastTradeDate'].update(convert_date_hours_minuites(df['lastTradeDate'], 'lastTradeDate'))

@@ -1,14 +1,1 @@
-AAPL
-SPY
-T
-AMZN
-SPY
-T
-VOO
-
-VOO
-VOO
-
-VOO
-SPY
-T
+0
